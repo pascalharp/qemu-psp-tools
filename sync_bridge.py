@@ -158,7 +158,7 @@ class BridgeFollow(gdb.Command):
             sb_print("<register> -> (Self, Leader)")
             for k in missmatch:
                 (a, b) = missmatch[k]
-                print("{} -> ( {} , {} )".format(k, hex(a), hex(b)))
+                sb_print("{} -> ( {} , {} )".format(k, hex(a), hex(b)))
 
         except Exception as err:
             sb_print("Error while bridge sync: {}".format(err))
