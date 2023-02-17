@@ -5,7 +5,7 @@ PSPEMU_BIN="${HOME}/git/github.com/PSPEmu/PSPEmu"
 GDB_ARM_BIN="/usr/bin/arm-none-eabi-gdb"
 START_ADDR="*0xffff0020"
 ENDR_ADDR="*0x100"
-ITERATIONS="1000"
+ITERATIONS="100"
 
 declare -A zen=( \
     ["machine"]="amd-psp-zen" \
@@ -42,14 +42,64 @@ test_qemu() {
             -s -S -nographic \
             &>/dev/null &
 
+        if [ $? -ne 0 ]; then
+            echo "GDB failed with $retVal. Exiting"
+        fi
+
+        emuPid=$!
+
         # Start gdb
         ${GDB_ARM_BIN} \
             -ex "target extended-remote localhost:1234" \
             -ex "set confirm off" \
             -ex "source ${HOME}/git/github.com/qemu-psp-tools/measure.py" \
-            -ex "measure *0xffff0020 *0x100 -l ${2}" \
+            -ex "measure *0xffff0024 *0x100 -l ${2}" \
             -ex "kill" -ex "quit" \
             &>/dev/null
+
+        wait $emuPid
+        retVal=$?
+        if [ $retVal -ne 0 ]; then
+            echo "QEMU failed with $retVal. Exiting"
+            exit 1
+        fi
+    done
+}
+
+test_pspemu() {
+    declare -n psp=${psps["$1"]}
+    for ((i = 0; i < $ITERATIONS; i++)); do
+        echo "Iteration: $i"
+        # Start emulator
+        ${PSPEMU_BIN} \
+            --emulation-mode on-chip-bl \
+            --psp-profile ${psp[pspemu-profile]} \
+            --on-chip-bl ${PSP_ON_CHIP_PATH}/${psp[on-chip]} \
+            --flash-rom ${PSP_OFF_CHIP_PATH}/${psp[off-chip]} \
+            --dbg 1225 \
+            &>/dev/null &
+
+        emuPid=$!
+
+        # Start gdb
+        ${GDB_ARM_BIN} \
+            -ex "target extended-remote localhost:1225" \
+            -ex "set confirm off" \
+            -ex "source ${HOME}/git/github.com/qemu-psp-tools/measure.py" \
+            -ex "measure *0xffff0024 *0x100 -l ${2}" \
+            -ex "quit" \
+            &>/dev/null
+
+        if [ $? -ne 0 ]; then
+            echo "GDB failed with $retVal. Exiting"
+        fi
+
+        wait $emuPid
+        retVal=$?
+        if [ $retVal -ne 1 ]; then #PSPEmu is a bit special here
+            echo "PSPEmu failed with $retVal. Exiting"
+            exit 1
+        fi
     done
 }
 
@@ -66,7 +116,7 @@ fi
 case $1 in
     qemu) test_qemu $2 $3
     ;;
-    pspemu) echo 2 or 3
+    pspemu) test_pspemu $2 $3
     ;;
     *)
         echo "Invalid argument"
