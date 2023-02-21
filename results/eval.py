@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatch
 import csv
 
 class Data:
@@ -25,5 +26,47 @@ if __name__ == "__main__":
     pspemu_zen_plus = Data("pspemu_zen_plus.csv", "PSPEmu Zen+")
 
     all_data = [ qemu_zen, qemu_zen_plus, qemu_zen_two, pspemu_zen, pspemu_zen_plus ]
+
+    qlabels = []
+    ulabels = []
+    fig, (qdata, udata) = plt.subplots(2, 1)
+    #fig.tight_layout()
+
+
+    qdata.set_title("QEMU-PSP")
+    qdata.set_xticklabels([])
+    qdata.set_xticks([])
+    qviolins = qdata.violinplot([qemu_zen.raw, qemu_zen_plus.raw, qemu_zen_two.raw], widths=0.8)
+    qviolins['cbars'].set_color('grey')
+    qviolins['cmins'].set_color('grey')
+    qviolins['cmaxes'].set_color('grey')
+
+    qvio = qviolins['bodies']
+    qvio[0].set_color('red')
+    qlabels.append((mpatch.Patch(color='red'), "Zen"))
+    qvio[1].set_color('green')
+    qlabels.append((mpatch.Patch(color='green'), "Zen+"))
+    qvio[2].set_color('blue')
+    qlabels.append((mpatch.Patch(color='blue'), "Zen2"))
+    qdata.legend(*zip(*qlabels), loc=1)
+
+
+    udata.set_title("PSPEmu")
+    udata.set_xticklabels([])
+    udata.set_xticks([])
+    uviolins = udata.violinplot([pspemu_zen.raw, pspemu_zen_plus.raw], widths=0.8)
+    uviolins['cbars'].set_color('grey')
+    uviolins['cmins'].set_color('grey')
+    uviolins['cmaxes'].set_color('grey')
+
+    uvio = uviolins['bodies']
+    uvio[0].set_color('red')
+    ulabels.append((mpatch.Patch(color='red'), "Zen"))
+    uvio[1].set_color('green')
+    ulabels.append((mpatch.Patch(color='green'), "Zen+"))
+    udata.legend(*zip(*ulabels), loc=1)
+
+    fig.supylabel("elapsed time in ns")
+    plt.show()
 
     print(*all_data, sep='\n')
