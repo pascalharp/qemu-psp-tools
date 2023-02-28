@@ -37,17 +37,21 @@ if __name__ == "__main__":
 
     qlabels = []
     ulabels = []
-    fig, (qax, uax) = plt.subplots(2, 1)
+    fig, (qax, uax) = plt.subplots(1, 2)
 
     qax.bar(np.arange(len(qemu_data)), [ x.mean for x in qemu_data ], yerr=[ x.std for x in qemu_data ], align='center', alpha=0.5, ecolor='black', color=['red', 'green', 'blue'], capsize=10)
     qax.set_xticks(np.arange(len(qemu_data)))
     qax.set_xticklabels([ x.name for x in qemu_data ])
+    qax.set_ylabel("elapsed time in ms")
+    qax.set_xlim(-0.5,3-0.5)
 
     ## add fake shadow plot for PSPEmu Zen2
-    uax.bar(np.arange(len(pspemu_data) + 1), [ x.mean for x in pspemu_data ] + [0.0], yerr=[ x.std for x in pspemu_data ] + [0], align='center', alpha=0.5, ecolor='black', color=['red', 'green', 'blue'], capsize=10)
-    uax.set_xticks(np.arange(len(pspemu_data) + 1))
+    uax.bar(np.arange(len(pspemu_data)), [ x.mean for x in pspemu_data ], yerr=[ x.std for x in pspemu_data ], align='center', alpha=0.5, ecolor='black', color=['red', 'green', 'blue'], capsize=10)
+    uax.set_xticks(np.arange(len(pspemu_data)))
     uax.set_ylim(bottom=3000)
-    uax.set_xticklabels([ x.name for x in pspemu_data ] + ["PSPEmu Zen2"])
+    uax.set_xticklabels([ x.name for x in pspemu_data ])
+    uax.set_ylabel("elapsed time in ms")
+    uax.set_xlim(-0.5,3-0.5)
 
 
 #    qdata.set_title("QEMU-PSP")
@@ -83,7 +87,7 @@ if __name__ == "__main__":
 #    ulabels.append((mpatch.Patch(color='green'), "Zen+"))
 #    udata.legend(*zip(*ulabels), loc=1)
 
-    fig.supylabel("elapsed time in ms")
+    #fig.supylabel("elapsed time in ms")
     plt.show()
 
     print(*all_data, sep='\n')

@@ -10,7 +10,7 @@ def pretty_print(val: str):
 class Plugin(gdb.Command):
 
     def __init__(self):
-        pretty_print("Loaded. Use")
+        pretty_print("Loaded. Use: measure <start_addr> <end_add> [log_file]")
         self.sts_port = None
         gdb.Command.__init__(self, "measure", gdb.COMMAND_OBSCURE, gdb.COMPLETE_NONE)
 

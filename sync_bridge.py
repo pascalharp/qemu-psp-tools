@@ -108,14 +108,14 @@ class BridgeFollow(gdb.Command):
 
     def invoke(self, args, tty):
 
-        print("Connecting to {} on port {} as follower".format(self.plug.host, self.plug.port))
+        sb_print("Connecting to {} on port {} as follower".format(self.plug.host, self.plug.port))
         try:
             self.sock = socket.create_connection((self.plug.host, self.plug.port), TIMEOUT)
         except socket.error as err:
             if self.sock:
                 self.sock.close()
                 self.sock = None
-            print("Connection error: {}".format(err))
+            sb_print("Connection error: {}".format(err))
             return None
 
         try:
